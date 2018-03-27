@@ -1,0 +1,27 @@
+{
+    "app-id": "com.endlessm.BaseEknServicesMultiplexer",
+    "branch": "@BRANCH@",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "1.6",
+    "sdk": "org.freedesktop.Sdk",
+    "add-extensions": {
+        "com.endlessm.EknServices.Extension": {
+            "directory": "build/eos-knowledge-services/1",
+            "version": "eos3"
+        },
+        "com.endlessm.EknServices2.Extension": {
+            "directory": "build/eos-knowledge-services/2",
+            "version": "@BRANCH@"
+        }
+    },
+    "modules": [
+        {
+            "name": "multi-eos-knowledge-services-directories",
+            "buildsystem": "simple",
+            "build-commands": [
+                "mkdir -p /app/build/eos-knowledge-services/1",
+                "mkdir -p /app/build/eos-knowledge-services/2"
+            ]
+        }
+    ]
+}

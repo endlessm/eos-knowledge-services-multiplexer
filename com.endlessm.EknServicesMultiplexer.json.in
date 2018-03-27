@@ -1,0 +1,75 @@
+{
+    "app-id": "com.endlessm.EknServicesMultiplexer",
+    "base": "com.endlessm.BaseEknServicesMultiplexer",
+    "base-extensions": [
+        "com.endlessm.EknServices.Extension",
+        "com.endlessm.EknServices2.Extension"
+    ],
+    "branch": "@BRANCH@",
+    "runtime": "org.freedesktop.Platform",
+    "runtime-version": "1.6",
+    "sdk": "org.freedesktop.Sdk",
+    "finish-args": [
+        "--filesystem=/var/lib/flatpak:ro",
+        "--filesystem=/var/endless-extra/flatpak:ro",
+        "--filesystem=~/.local/share/flatpak:ro",
+        "--filesystem=~/.local/share",
+        "--env=EKN_SUBSCRIPTIONS_DIR=.local/share/com.endlessm.subscriptions",
+        "--share=network",
+        "--socket=session-bus",
+        "--own-name=com.endlessm.EknServices.SearchProviderV1",
+        "--own-name=com.endlessm.EknServices2.SearchProviderV2"
+    ],
+    "add-extensions": {
+        "com.endlessm.Platform": {
+            "directory": "sdk/0",
+            "no-autodownload": true,
+            "versions": "eos3.1;eos3.0"
+        },
+        "com.endlessm.apps.Platform@1": {
+            "directory": "sdk/1",
+            "no-autodownload": true,
+            "version": "1"
+        },
+        "com.endlessm.apps.Platform@2": {
+            "directory": "sdk/2",
+            "no-autodownload": true,
+            "version": "2"
+        },
+        "com.endlessm.apps.Platform": {
+            "directory": "sdk/3",
+            "no-autodownload": true,
+            "version": "3"
+        }
+    },
+    "modules": [
+        {
+            "name": "eos-knowledge-services-multiplexer",
+            "sources": [
+                {
+                    "type": "git",
+                    "path": ".",
+                    "branch": "@GIT_CLONE_BRANCH@"
+                }
+            ]
+        },
+        {
+            "name": "multi-eos-knowledge-services-directories",
+            "buildsystem": "simple",
+            "build-commands": [
+                "mkdir -p /app/sdk/0",
+                "mkdir -p /app/sdk/1",
+                "mkdir -p /app/sdk/2",
+                "mkdir -p /app/sdk/3",
+                "mkdir -p /app/eos-knowledge-services/",
+                "mkdir -p /app/lib/debug/eos-knowledge-services",
+                "cp -r /app/build/eos-knowledge-services/1 /app/eos-knowledge-services/1",
+                "mv /app/eos-knowledge-services/1/lib/debug /app/lib/debug/eos-knowledge-services/1",
+                "ln -s /app/eos-knowledge-services/1/bin/eks-search-provider-v1 /app/bin/eks-search-provider-v1",
+                "cp -r /app/build/eos-knowledge-services/2 /app/eos-knowledge-services/2",
+                "mv /app/eos-knowledge-services/2/lib/debug /app/lib/debug/eos-knowledge-services/2",
+                "ln -s /app/eos-knowledge-services/2/bin/eks-search-provider-v2 /app/bin/eks-search-provider-v2"
+            ]
+        }
+    ]
+}

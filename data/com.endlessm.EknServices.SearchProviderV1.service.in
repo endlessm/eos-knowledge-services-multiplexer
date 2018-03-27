@@ -1,0 +1,3 @@
+[D-BUS Service]
+Name=com.endlessm.EknServices.SearchProviderV1
+Exec=%bindir%/eks-multi-search-provider-dispatcher --services-version 1 --arch %arch%
