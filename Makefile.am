@@ -26,6 +26,7 @@ do_subst = $(SED) -e 's|%bindir%|$(bindir)|g' -e 's|%arch%|$(UNAME_ARCH)|g'
 subst_files = \
 	data/com.endlessm.EknServices.SearchProviderV1.service \
 	data/com.endlessm.EknServices2.SearchProviderV2.service \
+	data/com.endlessm.EknServices3.SearchProviderV3.service \
 	$(NULL)
 
 $(subst_files): %: %.in Makefile
@@ -52,6 +53,7 @@ servicedir = $(datadir)/dbus-1/services
 service_DATA = \
 	data/com.endlessm.EknServices.SearchProviderV1.service \
 	data/com.endlessm.EknServices2.SearchProviderV2.service \
+	data/com.endlessm.EknServices3.SearchProviderV3.service \
 	$(NULL)
 
 -include $(top_srcdir)/git.mk
