@@ -24,7 +24,7 @@
             "buildsystem": "simple",
             "build-commands": [
                 "mkdir -p /app/build/eos-knowledge-services/1",
-                "mkdir -p /app/build/eos-knowledge-services/2"
+                "mkdir -p /app/build/eos-knowledge-services/2",
                 "mkdir -p /app/build/eos-knowledge-services/3"
             ]
         }
