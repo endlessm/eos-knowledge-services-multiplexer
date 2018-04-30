@@ -199,6 +199,28 @@ dispatch_correct_service (const char   *services_version,
                                  &ld_library_paths,
                                  &xdg_data_dirs);
     }
+  else if (g_strcmp0 (services_version, "3") == 0)
+    {
+      const char * const candidate_sdks[] = {
+        "/app/sdk/4",
+        NULL
+      };
+      const char *sdk_path = find_sdk_with_highest_priority (candidate_sdks,
+                                                             services_version,
+                                                             error);
+
+      if (sdk_path == NULL)
+        return FALSE;
+
+      create_paths_for_prefixes ("eks-search-provider-v3",
+                                 sdk_path,
+                                 "/app/eos-knowledge-services/3",
+                                 arch,
+                                 &argv,
+                                 &executable_paths,
+                                 &ld_library_paths,
+                                 &xdg_data_dirs);
+    }
   else
     {
       g_set_error (error,
