@@ -202,6 +202,7 @@ dispatch_correct_service (const char   *services_version,
   else if (g_strcmp0 (services_version, "3") == 0)
     {
       const char * const candidate_sdks[] = {
+        "/app/sdk/5",
         "/app/sdk/4",
         NULL
       };
