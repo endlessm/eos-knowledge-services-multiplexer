@@ -47,6 +47,11 @@
             "directory": "sdk/4",
             "no-autodownload": true,
             "version": "4"
+        },
+        "com.endlessm.apps.Platform": {
+            "directory": "sdk/5",
+            "no-autodownload": true,
+            "version": "5"
         }
     },
     "modules": [
@@ -69,6 +74,7 @@
                 "mkdir -p /app/sdk/2",
                 "mkdir -p /app/sdk/3",
                 "mkdir -p /app/sdk/4",
+                "mkdir -p /app/sdk/5",
                 "mkdir -p /app/eos-knowledge-services/",
                 "mkdir -p /app/lib/debug/eos-knowledge-services",
                 "cp -r /app/build/eos-knowledge-services/1 /app/eos-knowledge-services/1",
