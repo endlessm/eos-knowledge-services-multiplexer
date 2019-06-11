@@ -1,9 +1,9 @@
 {
     "app-id": "com.endlessm.BaseEknServicesMultiplexer",
     "branch": "@BRANCH@",
-    "runtime": "org.freedesktop.Platform",
-    "runtime-version": "1.6",
-    "sdk": "org.freedesktop.Sdk",
+    "runtime": "com.endlessm.apps.Platform",
+    "runtime-version": "5",
+    "sdk": "com.endlessm.apps.Sdk",
     "add-extensions": {
         "com.endlessm.EknServices.Extension": {
             "directory": "build/eos-knowledge-services/1",
