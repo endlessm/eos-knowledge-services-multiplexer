@@ -7,9 +7,9 @@
         "com.endlessm.EknServices3.Extension"
     ],
     "branch": "@BRANCH@",
-    "runtime": "org.freedesktop.Platform",
-    "runtime-version": "1.6",
-    "sdk": "org.freedesktop.Sdk",
+    "runtime": "com.endlessm.apps.Platform",
+    "runtime-version": "5",
+    "sdk": "com.endlessm.apps.Sdk",
     "finish-args": [
         "--filesystem=/var/lib/flatpak:ro",
         "--filesystem=/var/endless-extra/flatpak:ro",
