@@ -56,6 +56,24 @@ PKG_PROG_PKG_CONFIG
 UNAME_ARCH=$(uname -p)
 AC_SUBST([UNAME_ARCH])
 
+# Newer arches will only build EknServices 3. Figure out what to do
+# based on the architecture. flatpak-builder sets FLATPAK_ARCH.
+# Otherwise, use flatpak --default-arch for local testing.
+AC_ARG_VAR([FLATPAK_ARCH], [Flatpak architecture])
+if test -z "$FLATPAK_ARCH"; then
+  FLATPAK_ARCH=$(flatpak --default-arch)
+fi
+case "$FLATPAK_ARCH" in
+  x86_64|arm)
+    COMPAT_ARCH=y
+    AC_DEFINE([COMPAT_ARCH], [1], [Arch providing EknServices 1 and 2])
+    ;;
+  *)
+    COMPAT_ARCH=n
+    ;;
+esac
+AM_CONDITIONAL([COMPAT_ARCH], [test "$COMPAT_ARCH" = y])
+
 # Only need glib and gio for the multi-services binary
 PKG_CHECK_MODULES([MULTI_SERVICES], [
   gio-2.0
@@ -68,7 +86,7 @@ AC_CACHE_SAVE
 # Output
 # ------
 # List files here that the configure script should output
-
+AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([
   Makefile
 ])

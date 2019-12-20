@@ -23,18 +23,9 @@ EXTRA_DIST =
 # # # SUBSTITUTED FILES # # #
 # These files need to be filled in with make variables
 do_subst = $(SED) -e 's|%bindir%|$(bindir)|g' -e 's|%arch%|$(UNAME_ARCH)|g'
-subst_files = \
-	data/com.endlessm.EknServices.SearchProviderV1.service \
-	data/com.endlessm.EknServices2.SearchProviderV2.service \
-	data/com.endlessm.EknServices3.SearchProviderV3.service \
-	$(NULL)
-
-$(subst_files): %: %.in Makefile
+%: %.in Makefile
 	$(AM_V_GEN)$(MKDIR_P) $(@D) && \
 	$(do_subst) $< > $@
-
-CLEANFILES += $(subst_files)
-EXTRA_DIST += $(patsubst %,%.in,$(subst_files))
 
 bin_PROGRAMS = eks-multi-search-provider-dispatcher
 eks_multi_search_provider_dispatcher_SOURCES = \
@@ -51,10 +42,19 @@ eks_multi_search_provider_dispatcher_LDADD = \
 
 servicedir = $(datadir)/dbus-1/services
 service_DATA = \
-	data/com.endlessm.EknServices.SearchProviderV1.service \
-	data/com.endlessm.EknServices2.SearchProviderV2.service \
 	data/com.endlessm.EknServices3.SearchProviderV3.service \
 	$(NULL)
+
+# EknServices 1 & 2 not provided by newer architectures
+if COMPAT_ARCH
+service_DATA += \
+	data/com.endlessm.EknServices.SearchProviderV1.service \
+	data/com.endlessm.EknServices2.SearchProviderV2.service \
+	$(NULL)
+endif
+
+CLEANFILES += $(service_DATA)
+EXTRA_DIST += $(patsubst %,%.in,$(service_DATA))
 
 -include $(top_srcdir)/git.mk
 
