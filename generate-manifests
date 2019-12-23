@@ -1,0 +1,140 @@
+#!/usr/bin/python3
+
+from argparse import ArgumentParser
+import json
+import os
+import subprocess
+
+PROGDIR = os.path.dirname(__file__)
+BASE_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.BaseEknServicesMultiplexer.json.in.in')
+BASE_OUTPUT = os.path.splitext(BASE_TEMPLATE)[0]
+MULTIPLEXER_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.EknServicesMultiplexer.json.in.in')
+MULTIPLEXER_OUTPUT = os.path.splitext(MULTIPLEXER_TEMPLATE)[0]
+DIRECTORIES_MODULE_NAME = 'multi-eos-knowledge-services-directories'
+COMPAT_ARCHES = [
+    'x86_64',
+    'arm',
+]
+
+
+def generate_base_manifest(arch):
+    with open(BASE_TEMPLATE, 'r') as f:
+        manifest = json.load(f)
+
+    # Newer architectures don't provide EknServices 1 & 2 extensions
+    if arch in COMPAT_ARCHES:
+        manifest['add-extensions'].update({
+            'com.endlessm.EknServices.Extension': {
+                'directory': 'build/eos-knowledge-services/1',
+                'version': 'eos3',
+            },
+            'com.endlessm.EknServices2.Extension': {
+                'directory': 'build/eos-knowledge-services/2',
+                'version': 'stable',
+            },
+        })
+
+        directories_module = None
+        for module in manifest['modules']:
+            if module['name'] == DIRECTORIES_MODULE_NAME:
+                directories_module = module
+                break
+        if directories_module is None:
+            raise Exception(f'Could not find module {DIRECTORIES_MODULE_NAME}')
+        directories_module['build-commands'] += [
+            'mkdir -p /app/build/eos-knowledge-services/1',
+            'mkdir -p /app/build/eos-knowledge-services/2',
+        ]
+
+    with open(BASE_OUTPUT, 'w') as f:
+        json.dump(manifest, f, indent=4)
+
+
+def generate_multiplexer_manifest(arch):
+    with open(MULTIPLEXER_TEMPLATE, 'r') as f:
+        manifest = json.load(f)
+
+    # Newer architectures don't provide EknServices 1 & 2 extensions or
+    # SDK versions before 5.
+    if arch in COMPAT_ARCHES:
+        manifest['base-extensions'] += [
+            'com.endlessm.EknServices.Extension',
+            'com.endlessm.EknServices2.Extension',
+        ]
+        manifest['finish-args'] += [
+            '--own-name=com.endlessm.EknServices.SearchProviderV1',
+            '--own-name=com.endlessm.EknServices2.SearchProviderV2',
+        ]
+        manifest['add-extensions'].update({
+            'com.endlessm.Platform': {
+                'directory': 'sdk/0',
+                'no-autodownload': True,
+                'versions': 'eos3.1;eos3.0',
+            },
+            'com.endlessm.apps.Platform@1': {
+                'directory': 'sdk/1',
+                'no-autodownload': True,
+                'version': '1',
+            },
+            'com.endlessm.apps.Platform@2': {
+                'directory': 'sdk/2',
+                'no-autodownload': True,
+                'version': '2',
+            },
+            'com.endlessm.apps.Platform@3': {
+                'directory': 'sdk/3',
+                'no-autodownload': True,
+                'version': '3',
+            },
+            'com.endlessm.apps.Platform': {
+                'directory': 'sdk/4',
+                'no-autodownload': True,
+                'version': '4'
+            },
+        })
+
+        directories_module = None
+        for module in manifest['modules']:
+            if module['name'] == DIRECTORIES_MODULE_NAME:
+                directories_module = module
+                break
+        if directories_module is None:
+            raise Exception(f'Could not find module {DIRECTORIES_MODULE_NAME}')
+
+        directories_build_commands = directories_module['build-commands']
+        directories_build_commands += [f'mkdir -p /app/sdk/{version}'
+                                       for version in range(1, 5)]
+        for version in range(1, 3):
+            directories_build_commands += [
+                ('cp -r /app/build/eos-knowledge-services/{v} '
+                 '/app/eos-knowledge-services/{v}'
+                 .format(v=version)),
+                ('mv /app/eos-knowledge-services/{v}/lib/debug '
+                 '/app/lib/debug/eos-knowledge-services/{v}'
+                 .format(v=version)),
+                ('ln -s '
+                 '/app/eos-knowledge-services/{v}/bin/eks-search-provider-v{v} '
+                 '/app/bin/eks-search-provider-v{v}'
+                 .format(v=version)),
+            ]
+
+    with open(MULTIPLEXER_OUTPUT, 'w') as f:
+        json.dump(manifest, f, indent=4)
+
+
+ap = ArgumentParser(
+    description='Generate EknServicesMultiplexer manifests'
+)
+ap.add_argument('--arch', default=os.getenv('FLATPAK_ARCH'),
+                help='flatpak architecture')
+args = ap.parse_args()
+
+if args.arch is None:
+    # Use flatpak --default-arch for local testing
+    cmd = ('flatpak', '--default-arch')
+    args.arch = subprocess.check_output(cmd).decode('utf-8').strip()
+
+generate_base_manifest(args.arch)
+generate_multiplexer_manifest(args.arch)

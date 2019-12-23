@@ -5,14 +5,6 @@
     "runtime-version": "5",
     "sdk": "com.endlessm.apps.Sdk",
     "add-extensions": {
-        "com.endlessm.EknServices.Extension": {
-            "directory": "build/eos-knowledge-services/1",
-            "version": "eos3"
-        },
-        "com.endlessm.EknServices2.Extension": {
-            "directory": "build/eos-knowledge-services/2",
-            "version": "stable"
-        },
         "com.endlessm.EknServices3.Extension": {
             "directory": "build/eos-knowledge-services/3",
             "version": "@BRANCH@"
@@ -23,8 +15,6 @@
             "name": "multi-eos-knowledge-services-directories",
             "buildsystem": "simple",
             "build-commands": [
-                "mkdir -p /app/build/eos-knowledge-services/1",
-                "mkdir -p /app/build/eos-knowledge-services/2",
                 "mkdir -p /app/build/eos-knowledge-services/3"
             ]
         }

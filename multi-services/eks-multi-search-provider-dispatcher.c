@@ -15,6 +15,10 @@
  * <http://www.gnu.org/licenses/>.
  */
 
+#ifdef HAVE_CONFIG_H
+#include <config.h>
+#endif
+
 #include <gio/gio.h>
 #include <glib.h>
 
@@ -153,6 +157,8 @@ dispatch_correct_service (const char   *services_version,
   g_auto(GStrv) ld_library_paths = NULL;
   g_auto(GStrv) xdg_data_dirs = NULL;
 
+  /* EknServices 1 & 2 not provided by newer architecures. */
+#ifdef COMPAT_ARCH
   if (g_strcmp0 (services_version, "1") == 0)
     {
       const char * const candidate_sdks[] = {
@@ -199,7 +205,9 @@ dispatch_correct_service (const char   *services_version,
                                  &ld_library_paths,
                                  &xdg_data_dirs);
     }
-  else if (g_strcmp0 (services_version, "3") == 0)
+  else
+#endif /* COMPAT_ARCH */
+  if (g_strcmp0 (services_version, "3") == 0)
     {
       const char * const candidate_sdks[] = {
         "/app/sdk/5",
