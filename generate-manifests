@@ -88,7 +88,7 @@ def generate_multiplexer_manifest(arch):
                 'no-autodownload': True,
                 'version': '3',
             },
-            'com.endlessm.apps.Platform': {
+            'com.endlessm.apps.Platform@4': {
                 'directory': 'sdk/4',
                 'no-autodownload': True,
                 'version': '4'
