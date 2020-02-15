@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="addon">
+  <id>com.endlessm.BaseEknServicesMultiplexer</id>
+  <extends>com.endlessm.EknServicesMultiplexer</extends>
+  <metadata_license>CC0</metadata_license>
+  <project_license>LGPL-2.1+</project_license>
+  <name>Endless Desktop Search Extensions</name>
+  <summary>Extension points for Endless Desktop Search</summary>
+  <url type="homepage">https://endlessos.com/</url>
+</component>

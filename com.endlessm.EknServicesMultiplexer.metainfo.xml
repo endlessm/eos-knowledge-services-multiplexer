@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="generic">
+  <id>com.endlessm.EknServicesMultiplexer</id>
+  <metadata_license>CC0</metadata_license>
+  <project_license>LGPL-2.1+</project_license>
+  <name>Endless Desktop Search</name>
+  <summary>Desktop search provider for Endless applications</summary>
+  <url type="homepage">https://endlessos.com/</url>
+</component>

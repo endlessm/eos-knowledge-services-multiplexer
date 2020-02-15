@@ -17,6 +17,19 @@
             "build-commands": [
                 "mkdir -p /app/build/eos-knowledge-services/3"
             ]
+        },
+        {
+            "name": "appstream",
+            "buildsystem": "simple",
+            "build-commands": [
+                "install -Dm644 com.endlessm.BaseEknServicesMultiplexer.metainfo.xml /app/share/metainfo/com.endlessm.BaseEknServicesMultiplexer.metainfo.xml"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "path": "com.endlessm.BaseEknServicesMultiplexer.metainfo.xml"
+                }
+            ]
         }
     ]
 }
