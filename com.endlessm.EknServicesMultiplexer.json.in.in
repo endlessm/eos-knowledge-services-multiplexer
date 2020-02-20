@@ -47,6 +47,19 @@
                 "mv /app/eos-knowledge-services/3/lib/debug /app/lib/debug/eos-knowledge-services/3",
                 "ln -s /app/eos-knowledge-services/3/bin/eks-search-provider-v3 /app/bin/eks-search-provider-v3"
             ]
+        },
+        {
+            "name": "appstream",
+            "buildsystem": "simple",
+            "build-commands": [
+                "install -Dm644 com.endlessm.EknServicesMultiplexer.metainfo.xml /app/share/metainfo/com.endlessm.EknServicesMultiplexer.metainfo.xml"
+            ],
+            "sources": [
+                {
+                    "type": "file",
+                    "path": "com.endlessm.EknServicesMultiplexer.metainfo.xml"
+                }
+            ]
         }
     ]
 }
