@@ -7,4 +7,6 @@
   <name>Endless Desktop Search Extensions</name>
   <summary>Extension points for Endless Desktop Search</summary>
   <url type="homepage">https://endlessos.com/</url>
+  <project_group>Endless</project_group>
+  <bundle type="flatpak" runtime="com.endlessm.apps.Platform/@ARCH@/@SDK_BRANCH@" sdk="com.endlessm.apps.Sdk/@ARCH@/@SDK_BRANCH@">runtime/com.endlessm.BaseEknServicesMultiplexer/@ARCH@/@BRANCH@</bundle>
 </component>
