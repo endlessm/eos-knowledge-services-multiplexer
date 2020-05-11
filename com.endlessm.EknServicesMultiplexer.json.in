@@ -6,7 +6,7 @@
     ],
     "branch": "@BRANCH@",
     "runtime": "com.endlessm.apps.Platform",
-    "runtime-version": "5",
+    "runtime-version": "@SDK_BRANCH@",
     "sdk": "com.endlessm.apps.Sdk",
     "finish-args": [
         "--filesystem=/var/lib/flatpak:ro",
@@ -20,9 +20,9 @@
     ],
     "add-extensions": {
         "com.endlessm.apps.Platform": {
-            "directory": "sdk/5",
+            "directory": "sdk/@SDK_BRANCH@",
             "no-autodownload": true,
-            "version": "5"
+            "version": "@SDK_BRANCH@"
         }
     },
     "modules": [
@@ -40,7 +40,7 @@
             "name": "multi-eos-knowledge-services-directories",
             "buildsystem": "simple",
             "build-commands": [
-                "mkdir -p /app/sdk/5",
+                "mkdir -p /app/sdk/@SDK_BRANCH@",
                 "mkdir -p /app/eos-knowledge-services/",
                 "mkdir -p /app/lib/debug/eos-knowledge-services",
                 "cp -r /app/build/eos-knowledge-services/3 /app/eos-knowledge-services/3",

@@ -6,25 +6,50 @@ import os
 import subprocess
 
 PROGDIR = os.path.dirname(__file__)
-BASE_TEMPLATE = os.path.join(
-    PROGDIR, 'com.endlessm.BaseEknServicesMultiplexer.json.in.in')
-BASE_OUTPUT = os.path.splitext(BASE_TEMPLATE)[0]
-MULTIPLEXER_TEMPLATE = os.path.join(
-    PROGDIR, 'com.endlessm.EknServicesMultiplexer.json.in.in')
-MULTIPLEXER_OUTPUT = os.path.splitext(MULTIPLEXER_TEMPLATE)[0]
+BASE_MANIFEST_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.BaseEknServicesMultiplexer.json.in')
+BASE_METAINFO_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.BaseEknServicesMultiplexer.metainfo.xml.in')
+MULTIPLEXER_MANIFEST_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.EknServicesMultiplexer.json.in')
+MULTIPLEXER_METAINFO_TEMPLATE = os.path.join(
+    PROGDIR, 'com.endlessm.EknServicesMultiplexer.metainfo.xml.in')
 DIRECTORIES_MODULE_NAME = 'multi-eos-knowledge-services-directories'
 COMPAT_ARCHES = [
     'x86_64',
     'arm',
 ]
+SDK_BRANCH = '5'
 
 
-def generate_base_manifest(arch):
-    with open(BASE_TEMPLATE, 'r') as f:
-        manifest = json.load(f)
+def get_output_filename(template_filename):
+    return os.path.splitext(template_filename)[0]
+
+
+def replace_placeholders(content, **kwargs):
+    replacements = {
+        '@SDK_BRANCH@': SDK_BRANCH,
+        '@BRANCH@': kwargs['branch'],
+        '@ARCH@': kwargs['arch'],
+        '@GIT_CLONE_BRANCH@': os.environ.get('GIT_COMMIT', 'HEAD')
+    }
+    for key, replacement in replacements.items():
+        content = content.replace(key, replacement)
+    return content
+
+
+def replace_file_template_placeholders(template_filename, **kwargs):
+    with open(template_filename, 'r') as ftemplate:
+        with open(get_output_filename(template_filename), 'w') as foutput:
+            foutput.write(replace_placeholders(ftemplate.read(), **kwargs))
+
+
+def generate_base_manifest(**kwargs):
+    with open(BASE_MANIFEST_TEMPLATE, 'r') as ftemplate:
+        manifest = json.load(ftemplate)
 
     # Newer architectures don't provide EknServices 1 & 2 extensions
-    if arch in COMPAT_ARCHES:
+    if kwargs['arch'] in COMPAT_ARCHES:
         manifest['add-extensions'].update({
             'com.endlessm.EknServices.Extension': {
                 'directory': 'build/eos-knowledge-services/1',
@@ -48,17 +73,18 @@ def generate_base_manifest(arch):
             'mkdir -p /app/build/eos-knowledge-services/2',
         ]
 
-    with open(BASE_OUTPUT, 'w') as f:
-        json.dump(manifest, f, indent=4)
+    with open(get_output_filename(BASE_MANIFEST_TEMPLATE), 'w') as foutput:
+        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
+                                           **kwargs))
 
 
-def generate_multiplexer_manifest(arch):
-    with open(MULTIPLEXER_TEMPLATE, 'r') as f:
-        manifest = json.load(f)
+def generate_multiplexer_manifest(**kwargs):
+    with open(MULTIPLEXER_MANIFEST_TEMPLATE, 'r') as ftemplate:
+        manifest = json.load(ftemplate)
 
     # Newer architectures don't provide EknServices 1 & 2 extensions or
     # SDK versions before 5.
-    if arch in COMPAT_ARCHES:
+    if kwargs['arch'] in COMPAT_ARCHES:
         manifest['base-extensions'] += [
             'com.endlessm.EknServices.Extension',
             'com.endlessm.EknServices2.Extension',
@@ -120,8 +146,9 @@ def generate_multiplexer_manifest(arch):
                  .format(v=version)),
             ]
 
-    with open(MULTIPLEXER_OUTPUT, 'w') as f:
-        json.dump(manifest, f, indent=4)
+    with open(get_output_filename(MULTIPLEXER_MANIFEST_TEMPLATE), 'w') as foutput:
+        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
+                                           **kwargs))
 
 
 ap = ArgumentParser(
@@ -129,6 +156,8 @@ ap = ArgumentParser(
 )
 ap.add_argument('--arch', default=os.getenv('FLATPAK_ARCH'),
                 help='flatpak architecture')
+ap.add_argument('--branch', required=True,
+                help='flatpak branch')
 args = ap.parse_args()
 
 if args.arch is None:
@@ -136,5 +165,9 @@ if args.arch is None:
     cmd = ('flatpak', '--default-arch')
     args.arch = subprocess.check_output(cmd).decode('utf-8').strip()
 
-generate_base_manifest(args.arch)
-generate_multiplexer_manifest(args.arch)
+args = vars(args)
+
+generate_base_manifest(**args)
+replace_file_template_placeholders(BASE_METAINFO_TEMPLATE, **args)
+generate_multiplexer_manifest(**args)
+replace_file_template_placeholders(MULTIPLEXER_METAINFO_TEMPLATE, **args)
