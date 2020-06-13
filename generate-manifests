@@ -19,7 +19,7 @@ COMPAT_ARCHES = [
     'x86_64',
     'arm',
 ]
-SDK_BRANCH = '5'
+SDK_BRANCH = '6'
 
 
 def get_output_filename(template_filename):
@@ -82,6 +82,14 @@ def generate_multiplexer_manifest(**kwargs):
     with open(MULTIPLEXER_MANIFEST_TEMPLATE, 'r') as ftemplate:
         manifest = json.load(ftemplate)
 
+    manifest['add-extensions'].update({
+        'com.endlessm.apps.Platform@5': {
+            'directory': 'sdk/5',
+            'no-autodownload': True,
+            'version': '5'
+        },
+    })
+
     # Newer architectures don't provide EknServices 1 & 2 extensions or
     # SDK versions before 5.
     if kwargs['arch'] in COMPAT_ARCHES:
@@ -131,7 +139,7 @@ def generate_multiplexer_manifest(**kwargs):
 
         directories_build_commands = directories_module['build-commands']
         directories_build_commands += [f'mkdir -p /app/sdk/{version}'
-                                       for version in range(1, 5)]
+                                       for version in range(1, 6)]
         for version in range(1, 3):
             directories_build_commands += [
                 ('cp -r /app/build/eos-knowledge-services/{v} '
