@@ -22,7 +22,7 @@ EXTRA_DIST =
 
 # # # SUBSTITUTED FILES # # #
 # These files need to be filled in with make variables
-do_subst = $(SED) -e 's|%bindir%|$(bindir)|g' -e 's|%arch%|$(UNAME_ARCH)|g'
+do_subst = $(SED) -e 's|%bindir%|$(bindir)|g' -e 's|%arch%|$(FLATPAK_ARCH)|g'
 %: %.in Makefile
 	$(AM_V_GEN)$(MKDIR_P) $(@D) && \
 	$(do_subst) $< > $@

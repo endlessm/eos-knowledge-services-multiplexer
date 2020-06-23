@@ -122,12 +122,31 @@ create_paths_for_prefixes (const char *binary,
   g_ptr_array_add (ld_library_paths, g_build_filename (services_prefix, "lib", NULL));
   g_ptr_array_add (ld_library_paths, g_build_filename (sdk_prefix, "lib", NULL));
 
-  /* If we specified an arch, also add an arch-triple library path */
-  if (arch != NULL)
+  /* Map (flatpak) arch to multiarch tuple library path
+   * From <https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/include/_private/arch.yml>
+   */
+
+  if (g_strcmp0 (arch, "i386") == 0)
     {
-      g_autofree char *arch_triple = g_strdup_printf ("%s-linux-gnu", arch);
       g_ptr_array_add (ld_library_paths,
-                       g_build_filename (sdk_prefix, "lib", arch_triple, NULL));
+                       g_build_filename (sdk_prefix, "lib", "i386-linux-gnu", NULL));
+    }
+  else if (g_strcmp0 (arch, "arm") == 0)
+    {
+      g_ptr_array_add (ld_library_paths,
+                       g_build_filename (sdk_prefix, "lib", "arm-linux-gnueabihf", NULL));
+    }
+  else if (g_strcmp0 (arch, "x86_64") == 0)
+    {
+
+      g_ptr_array_add (ld_library_paths,
+                       g_build_filename (sdk_prefix, "lib", "x86_64-linux-gnu", NULL));
+    }
+  else if (g_strcmp0 (arch, "aarch64") == 0)
+    {
+
+      g_ptr_array_add (ld_library_paths,
+                       g_build_filename (sdk_prefix, "lib", "aarch64-linux-gnu", NULL));
     }
 
   g_ptr_array_add (ld_library_paths, NULL);
