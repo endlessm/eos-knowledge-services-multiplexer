@@ -8,6 +8,10 @@
         "com.endlessm.EknServices3.Extension": {
             "directory": "build/eos-knowledge-services/3",
             "version": "@BRANCH@"
+        },
+        "com.endlessm.EknServices4.Extension": {
+            "directory": "build/eos-knowledge-services/4",
+            "version": "@BRANCH@"
         }
     },
     "modules": [
@@ -15,7 +19,8 @@
             "name": "multi-eos-knowledge-services-directories",
             "buildsystem": "simple",
             "build-commands": [
-                "mkdir -p /app/build/eos-knowledge-services/3"
+                "mkdir -p /app/build/eos-knowledge-services/3",
+                "mkdir -p /app/build/eos-knowledge-services/4"
             ]
         },
         {

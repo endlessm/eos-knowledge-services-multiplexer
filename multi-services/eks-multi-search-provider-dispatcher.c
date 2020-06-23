@@ -210,7 +210,6 @@ dispatch_correct_service (const char   *services_version,
   if (g_strcmp0 (services_version, "3") == 0)
     {
       const char * const candidate_sdks[] = {
-        "/app/sdk/6",
         "/app/sdk/5",
         "/app/sdk/4",
         NULL
@@ -225,6 +224,28 @@ dispatch_correct_service (const char   *services_version,
       create_paths_for_prefixes ("eks-search-provider-v3",
                                  sdk_path,
                                  "/app/eos-knowledge-services/3",
+                                 arch,
+                                 &argv,
+                                 &executable_paths,
+                                 &ld_library_paths,
+                                 &xdg_data_dirs);
+    }
+  else if (g_strcmp0 (services_version, "4") == 0)
+    {
+      const char * const candidate_sdks[] = {
+        "/app/sdk/6",
+        NULL
+      };
+      const char *sdk_path = find_sdk_with_highest_priority (candidate_sdks,
+                                                             services_version,
+                                                             error);
+
+      if (sdk_path == NULL)
+        return FALSE;
+
+      create_paths_for_prefixes ("eks-search-provider-v4",
+                                 sdk_path,
+                                 "/app/eos-knowledge-services/4",
                                  arch,
                                  &argv,
                                  &executable_paths,

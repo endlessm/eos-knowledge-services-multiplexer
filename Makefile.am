@@ -43,6 +43,7 @@ eks_multi_search_provider_dispatcher_LDADD = \
 servicedir = $(datadir)/dbus-1/services
 service_DATA = \
 	data/com.endlessm.EknServices3.SearchProviderV3.service \
+	data/com.endlessm.EknServices4.SearchProviderV4.service \
 	$(NULL)
 
 # EknServices 1 & 2 not provided by newer architectures
