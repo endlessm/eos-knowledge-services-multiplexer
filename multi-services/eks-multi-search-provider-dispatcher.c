@@ -112,9 +112,6 @@ create_paths_for_prefixes (const char *binary,
   g_autoptr(GPtrArray) ld_library_paths = g_ptr_array_new_with_free_func (g_free);
   g_autoptr(GPtrArray) xdg_data_dirs = g_ptr_array_new_with_free_func (g_free);
 
-  g_ptr_array_add (argv, g_build_filename (services_prefix, "bin", binary, NULL));
-  g_ptr_array_add (argv, NULL);
-
   g_ptr_array_add (executable_paths, g_build_filename (services_prefix, "bin", NULL));
   g_ptr_array_add (executable_paths, g_build_filename (sdk_prefix, "bin", NULL));
   g_ptr_array_add (executable_paths, NULL);
@@ -122,31 +119,32 @@ create_paths_for_prefixes (const char *binary,
   g_ptr_array_add (ld_library_paths, g_build_filename (services_prefix, "lib", NULL));
   g_ptr_array_add (ld_library_paths, g_build_filename (sdk_prefix, "lib", NULL));
 
-  /* Map (flatpak) arch to multiarch tuple library path
+  /* Map (flatpak) arch to multiarch tuple library path and sdk-specific ld.so
    * From <https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/include/_private/arch.yml>
    */
 
-  if (g_strcmp0 (arch, "i386") == 0)
-    {
-      g_ptr_array_add (ld_library_paths,
-                       g_build_filename (sdk_prefix, "lib", "i386-linux-gnu", NULL));
-    }
-  else if (g_strcmp0 (arch, "arm") == 0)
+  if (g_strcmp0 (arch, "arm") == 0)
     {
       g_ptr_array_add (ld_library_paths,
                        g_build_filename (sdk_prefix, "lib", "arm-linux-gnueabihf", NULL));
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib", "ld-linux-armhf.so.2", NULL));
     }
   else if (g_strcmp0 (arch, "x86_64") == 0)
     {
 
       g_ptr_array_add (ld_library_paths,
                        g_build_filename (sdk_prefix, "lib", "x86_64-linux-gnu", NULL));
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib64", "ld-linux-x86-64.so.2", NULL));
     }
   else if (g_strcmp0 (arch, "aarch64") == 0)
     {
 
       g_ptr_array_add (ld_library_paths,
                        g_build_filename (sdk_prefix, "lib", "aarch64-linux-gnu", NULL));
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib", "ld-linux-aarch64.so.1", NULL));
     }
 
   g_ptr_array_add (ld_library_paths, NULL);
@@ -154,6 +152,9 @@ create_paths_for_prefixes (const char *binary,
   g_ptr_array_add (xdg_data_dirs, g_build_filename (services_prefix, "share", NULL));
   g_ptr_array_add (xdg_data_dirs, g_build_filename (sdk_prefix, "share", NULL));
   g_ptr_array_add (xdg_data_dirs, NULL);
+
+  g_ptr_array_add (argv, g_build_filename (services_prefix, "bin", binary, NULL));
+  g_ptr_array_add (argv, NULL);
 
   *out_argv = (GStrv) g_ptr_array_free (g_steal_pointer (&argv), FALSE);
   *out_executable_paths = (GStrv) g_ptr_array_free (g_steal_pointer (&executable_paths), FALSE);
