@@ -46,7 +46,7 @@ def replace_file_template_placeholders(template_filename, **kwargs):
 
 def generate_base_manifest(**kwargs):
     with open(BASE_MANIFEST_TEMPLATE, 'r') as ftemplate:
-        manifest = json.load(ftemplate)
+        manifest = json.loads(replace_placeholders(ftemplate.read(), **kwargs))
 
     manifest['add-extensions'].update({
         "com.endlessm.EknServices3.Extension@stable": {
@@ -85,13 +85,12 @@ def generate_base_manifest(**kwargs):
         ]
 
     with open(get_output_filename(BASE_MANIFEST_TEMPLATE), 'w') as foutput:
-        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
-                                           **kwargs))
+        foutput.write(json.dumps(manifest, indent=4))
 
 
 def generate_multiplexer_manifest(**kwargs):
     with open(MULTIPLEXER_MANIFEST_TEMPLATE, 'r') as ftemplate:
-        manifest = json.load(ftemplate)
+        manifest = json.loads(replace_placeholders(ftemplate.read(), **kwargs))
 
     manifest['add-extensions'].update({
         'com.endlessm.apps.Platform@5': {
@@ -171,8 +170,7 @@ def generate_multiplexer_manifest(**kwargs):
             ]
 
     with open(get_output_filename(MULTIPLEXER_MANIFEST_TEMPLATE), 'w') as foutput:
-        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
-                                           **kwargs))
+        foutput.write(json.dumps(manifest, indent=4))
 
 
 ap = ArgumentParser(
