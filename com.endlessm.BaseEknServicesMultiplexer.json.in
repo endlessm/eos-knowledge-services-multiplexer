@@ -5,11 +5,7 @@
     "runtime-version": "@SDK_BRANCH@",
     "sdk": "com.endlessm.apps.Sdk",
     "add-extensions": {
-        "com.endlessm.EknServices3.Extension": {
-            "directory": "build/eos-knowledge-services/3",
-            "version": "@BRANCH@"
-        },
-        "com.endlessm.EknServices4.Extension": {
+        "com.endlessm.EknServices4.Extension@@BRANCH@": {
             "directory": "build/eos-knowledge-services/4",
             "version": "@BRANCH@"
         }

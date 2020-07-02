@@ -21,7 +21,7 @@
         "--own-name=com.endlessm.EknServices4.SearchProviderV4"
     ],
     "add-extensions": {
-        "com.endlessm.apps.Platform": {
+        "com.endlessm.apps.Platform@@SDK_BRANCH@": {
             "directory": "sdk/@SDK_BRANCH@",
             "no-autodownload": true,
             "version": "@SDK_BRANCH@"

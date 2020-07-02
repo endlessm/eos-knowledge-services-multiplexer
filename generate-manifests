@@ -48,14 +48,25 @@ def generate_base_manifest(**kwargs):
     with open(BASE_MANIFEST_TEMPLATE, 'r') as ftemplate:
         manifest = json.load(ftemplate)
 
+    manifest['add-extensions'].update({
+        "com.endlessm.EknServices3.Extension@stable": {
+            "directory": "build/eos-knowledge-services/3",
+            "version": "stable"
+        },
+        "com.endlessm.EknServices4.Extension@stable": {
+            "directory": "build/eos-knowledge-services/4",
+            "version": "stable"
+        },
+    })
+
     # Newer architectures don't provide EknServices 1 & 2 extensions
     if kwargs['arch'] in COMPAT_ARCHES:
         manifest['add-extensions'].update({
-            'com.endlessm.EknServices.Extension': {
+            'com.endlessm.EknServices.Extension@eos3': {
                 'directory': 'build/eos-knowledge-services/1',
                 'version': 'eos3',
             },
-            'com.endlessm.EknServices2.Extension': {
+            'com.endlessm.EknServices2.Extension@stable': {
                 'directory': 'build/eos-knowledge-services/2',
                 'version': 'stable',
             },
