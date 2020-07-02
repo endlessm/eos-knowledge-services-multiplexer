@@ -1,10 +1,7 @@
 {
     "app-id": "com.endlessm.EknServicesMultiplexer",
     "base": "com.endlessm.BaseEknServicesMultiplexer",
-    "base-extensions": [
-        "com.endlessm.EknServices3.Extension",
-        "com.endlessm.EknServices4.Extension"
-    ],
+    "base-extensions": [],
     "branch": "@BRANCH@",
     "runtime": "com.endlessm.apps.Platform",
     "runtime-version": "@SDK_BRANCH@",
@@ -16,17 +13,9 @@
         "--filesystem=~/.local/share",
         "--env=EKN_SUBSCRIPTIONS_DIR=.local/share/com.endlessm.subscriptions",
         "--share=network",
-        "--socket=session-bus",
-        "--own-name=com.endlessm.EknServices3.SearchProviderV3",
-        "--own-name=com.endlessm.EknServices4.SearchProviderV4"
+        "--socket=session-bus"
     ],
-    "add-extensions": {
-        "com.endlessm.apps.Platform@@SDK_BRANCH@": {
-            "directory": "sdk/@SDK_BRANCH@",
-            "no-autodownload": true,
-            "version": "@SDK_BRANCH@"
-        }
-    },
+    "add-extensions": {},
     "modules": [
         {
             "name": "eos-knowledge-services-multiplexer",
@@ -42,15 +31,8 @@
             "name": "multi-eos-knowledge-services-directories",
             "buildsystem": "simple",
             "build-commands": [
-                "mkdir -p /app/sdk/@SDK_BRANCH@",
                 "mkdir -p /app/eos-knowledge-services/",
-                "mkdir -p /app/lib/debug/eos-knowledge-services",
-                "cp -r /app/build/eos-knowledge-services/3 /app/eos-knowledge-services/3",
-                "mv /app/eos-knowledge-services/3/lib/debug /app/lib/debug/eos-knowledge-services/3",
-                "ln -s /app/eos-knowledge-services/3/bin/eks-search-provider-v3 /app/bin/eks-search-provider-v3",
-                "cp -r /app/build/eos-knowledge-services/4 /app/eos-knowledge-services/4",
-                "mv /app/eos-knowledge-services/4/lib/debug /app/lib/debug/eos-knowledge-services/4",
-                "ln -s /app/eos-knowledge-services/4/bin/eks-search-provider-v4 /app/bin/eks-search-provider-v4"
+                "mkdir -p /app/lib/debug/eos-knowledge-services"
             ]
         },
         {
