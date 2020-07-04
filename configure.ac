@@ -52,10 +52,6 @@ AC_PROG_CC_C99
 # Library configuration tool
 PKG_PROG_PKG_CONFIG
 
-# Flatpak
-UNAME_ARCH=$(uname -p)
-AC_SUBST([UNAME_ARCH])
-
 # Newer arches will only build EknServices 3. Figure out what to do
 # based on the architecture. flatpak-builder sets FLATPAK_ARCH.
 # Otherwise, use flatpak --default-arch for local testing.
@@ -73,6 +69,8 @@ case "$FLATPAK_ARCH" in
     ;;
 esac
 AM_CONDITIONAL([COMPAT_ARCH], [test "$COMPAT_ARCH" = y])
+
+AC_SUBST([FLATPAK_ARCH])
 
 # Only need glib and gio for the multi-services binary
 PKG_CHECK_MODULES([MULTI_SERVICES], [

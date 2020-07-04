@@ -101,6 +101,7 @@ static void
 create_paths_for_prefixes (const char *binary,
                            const char *sdk_prefix,
                            const char *services_prefix,
+                           const char *services_version,
                            const char *arch,
                            GStrv      *out_argv,
                            GStrv      *out_executable_paths,
@@ -112,29 +113,50 @@ create_paths_for_prefixes (const char *binary,
   g_autoptr(GPtrArray) ld_library_paths = g_ptr_array_new_with_free_func (g_free);
   g_autoptr(GPtrArray) xdg_data_dirs = g_ptr_array_new_with_free_func (g_free);
 
-  g_ptr_array_add (argv, g_build_filename (services_prefix, "bin", binary, NULL));
-  g_ptr_array_add (argv, NULL);
-
   g_ptr_array_add (executable_paths, g_build_filename (services_prefix, "bin", NULL));
   g_ptr_array_add (executable_paths, g_build_filename (sdk_prefix, "bin", NULL));
   g_ptr_array_add (executable_paths, NULL);
 
+  /* Map (flatpak) arch to multiarch tuple library path
+   * From <https://gitlab.com/freedesktop-sdk/freedesktop-sdk/-/blob/master/include/_private/arch.yml>
+   */
+
+  if (g_strcmp0 (arch, "arm") == 0)
+    g_ptr_array_add (ld_library_paths,
+                     g_build_filename (sdk_prefix, "lib", "arm-linux-gnueabihf", NULL));
+  else if (g_strcmp0 (arch, "x86_64") == 0)
+    g_ptr_array_add (ld_library_paths,
+                     g_build_filename (sdk_prefix, "lib", "x86_64-linux-gnu", NULL));
+  else if (g_strcmp0 (arch, "aarch64") == 0)
+    g_ptr_array_add (ld_library_paths,
+                     g_build_filename (sdk_prefix, "lib", "aarch64-linux-gnu", NULL));
+
   g_ptr_array_add (ld_library_paths, g_build_filename (services_prefix, "lib", NULL));
   g_ptr_array_add (ld_library_paths, g_build_filename (sdk_prefix, "lib", NULL));
-
-  /* If we specified an arch, also add an arch-triple library path */
-  if (arch != NULL)
-    {
-      g_autofree char *arch_triple = g_strdup_printf ("%s-linux-gnu", arch);
-      g_ptr_array_add (ld_library_paths,
-                       g_build_filename (sdk_prefix, "lib", arch_triple, NULL));
-    }
-
   g_ptr_array_add (ld_library_paths, NULL);
 
   g_ptr_array_add (xdg_data_dirs, g_build_filename (services_prefix, "share", NULL));
   g_ptr_array_add (xdg_data_dirs, g_build_filename (sdk_prefix, "share", NULL));
   g_ptr_array_add (xdg_data_dirs, NULL);
+
+  /* Override ld.so for EknServices4 (SDK 6), because the multiplexer runs in
+   * a SDK 5 runtime with an incompatible ld.so. This code should be removed
+   * after the multiplexer is updated to SDK 6.
+   */
+
+  if (g_strcmp0 (services_version, "4") == 0)
+    if (g_strcmp0 (arch, "arm") == 0)
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib", "ld-linux-armhf.so.2", NULL));
+    else if (g_strcmp0 (arch, "x86_64") == 0)
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib64", "ld-linux-x86-64.so.2", NULL));
+    else if (g_strcmp0 (arch, "aarch64") == 0)
+      g_ptr_array_add (argv,
+                       g_build_filename (sdk_prefix, "lib", "ld-linux-aarch64.so.1", NULL));
+
+  g_ptr_array_add (argv, g_build_filename (services_prefix, "bin", binary, NULL));
+  g_ptr_array_add (argv, NULL);
 
   *out_argv = (GStrv) g_ptr_array_free (g_steal_pointer (&argv), FALSE);
   *out_executable_paths = (GStrv) g_ptr_array_free (g_steal_pointer (&executable_paths), FALSE);
@@ -176,6 +198,7 @@ dispatch_correct_service (const char   *services_version,
       create_paths_for_prefixes ("eks-search-provider-v1",
                                  sdk_path,
                                  "/app/eos-knowledge-services/1",
+                                 services_version,
                                  arch,
                                  &argv,
                                  &executable_paths,
@@ -199,6 +222,7 @@ dispatch_correct_service (const char   *services_version,
       create_paths_for_prefixes ("eks-search-provider-v2",
                                  sdk_path,
                                  "/app/eos-knowledge-services/2",
+                                 services_version,
                                  arch,
                                  &argv,
                                  &executable_paths,
@@ -210,7 +234,6 @@ dispatch_correct_service (const char   *services_version,
   if (g_strcmp0 (services_version, "3") == 0)
     {
       const char * const candidate_sdks[] = {
-        "/app/sdk/6",
         "/app/sdk/5",
         "/app/sdk/4",
         NULL
@@ -225,6 +248,30 @@ dispatch_correct_service (const char   *services_version,
       create_paths_for_prefixes ("eks-search-provider-v3",
                                  sdk_path,
                                  "/app/eos-knowledge-services/3",
+                                 services_version,
+                                 arch,
+                                 &argv,
+                                 &executable_paths,
+                                 &ld_library_paths,
+                                 &xdg_data_dirs);
+    }
+  else if (g_strcmp0 (services_version, "4") == 0)
+    {
+      const char * const candidate_sdks[] = {
+        "/app/sdk/6",
+        NULL
+      };
+      const char *sdk_path = find_sdk_with_highest_priority (candidate_sdks,
+                                                             services_version,
+                                                             error);
+
+      if (sdk_path == NULL)
+        return FALSE;
+
+      create_paths_for_prefixes ("eks-search-provider-v4",
+                                 sdk_path,
+                                 "/app/eos-knowledge-services/4",
+                                 services_version,
                                  arch,
                                  &argv,
                                  &executable_paths,

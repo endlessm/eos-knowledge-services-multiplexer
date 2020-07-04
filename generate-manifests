@@ -19,7 +19,9 @@ COMPAT_ARCHES = [
     'x86_64',
     'arm',
 ]
-SDK_BRANCH = '6'
+LAST_EKS_VERSION = 4
+LAST_SDK_VERSION = 6
+SDK_BRANCH = '5'
 
 
 def get_output_filename(template_filename):
@@ -44,119 +46,114 @@ def replace_file_template_placeholders(template_filename, **kwargs):
             foutput.write(replace_placeholders(ftemplate.read(), **kwargs))
 
 
-def generate_base_manifest(**kwargs):
-    with open(BASE_MANIFEST_TEMPLATE, 'r') as ftemplate:
-        manifest = json.load(ftemplate)
+def is_compat_arch(arch):
+    return arch in COMPAT_ARCHES
+
+
+def should_include_eks_version(eks_version, arch):
+    if eks_version >= 3:
+        return True
 
     # Newer architectures don't provide EknServices 1 & 2 extensions
-    if kwargs['arch'] in COMPAT_ARCHES:
-        manifest['add-extensions'].update({
-            'com.endlessm.EknServices.Extension': {
-                'directory': 'build/eos-knowledge-services/1',
-                'version': 'eos3',
-            },
-            'com.endlessm.EknServices2.Extension': {
-                'directory': 'build/eos-knowledge-services/2',
-                'version': 'stable',
-            },
-        })
+    return is_compat_arch(arch)
 
-        directories_module = None
-        for module in manifest['modules']:
-            if module['name'] == DIRECTORIES_MODULE_NAME:
-                directories_module = module
-                break
-        if directories_module is None:
-            raise Exception(f'Could not find module {DIRECTORIES_MODULE_NAME}')
-        directories_module['build-commands'] += [
-            'mkdir -p /app/build/eos-knowledge-services/1',
-            'mkdir -p /app/build/eos-knowledge-services/2',
-        ]
+
+def should_include_sdk_version(sdk_version, arch):
+    if sdk_version >= 5:
+        return True
+
+    # Newer architectures don't provide SDK v4 and older
+    return is_compat_arch(arch)
+
+
+def find_manifest_multi_directories_module(manifest):
+    for module in manifest['modules']:
+        if module['name'] == DIRECTORIES_MODULE_NAME:
+            return module
+
+    raise Exception(f'Could not find module {DIRECTORIES_MODULE_NAME}')
+
+
+def generate_base_manifest(**kwargs):
+    with open(BASE_MANIFEST_TEMPLATE, 'r') as ftemplate:
+        manifest = json.loads(replace_placeholders(ftemplate.read(), **kwargs))
+
+    directories_module = find_manifest_multi_directories_module(manifest)
+
+    for eks_version in range(1, LAST_EKS_VERSION + 1):
+        if should_include_eks_version(eks_version, kwargs['arch']):
+            eks_branch = 'eos3' if eks_version == 1 else 'stable'
+            eks_id_segment_version = '' if eks_version == 1 else str(eks_version)
+
+            manifest['add-extensions'].update({
+                f'com.endlessm.EknServices{eks_id_segment_version}.Extension@{eks_branch}': {
+                    'directory': f'build/eos-knowledge-services/{eks_version}',
+                    'version': eks_branch
+                },
+            })
+
+            directories_module['build-commands'].append(
+                f'mkdir -p /app/build/eos-knowledge-services/{eks_version}',
+            )
 
     with open(get_output_filename(BASE_MANIFEST_TEMPLATE), 'w') as foutput:
-        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
-                                           **kwargs))
+        foutput.write(json.dumps(manifest, indent=4))
 
 
 def generate_multiplexer_manifest(**kwargs):
     with open(MULTIPLEXER_MANIFEST_TEMPLATE, 'r') as ftemplate:
-        manifest = json.load(ftemplate)
+        manifest = json.loads(replace_placeholders(ftemplate.read(), **kwargs))
 
-    manifest['add-extensions'].update({
-        'com.endlessm.apps.Platform@5': {
-            'directory': 'sdk/5',
-            'no-autodownload': True,
-            'version': '5'
-        },
-    })
+    directories_build_commands = \
+        find_manifest_multi_directories_module(manifest)['build-commands']
 
-    # Newer architectures don't provide EknServices 1 & 2 extensions or
-    # SDK versions before 5.
-    if kwargs['arch'] in COMPAT_ARCHES:
-        manifest['base-extensions'] += [
-            'com.endlessm.EknServices.Extension',
-            'com.endlessm.EknServices2.Extension',
-        ]
-        manifest['finish-args'] += [
-            '--own-name=com.endlessm.EknServices.SearchProviderV1',
-            '--own-name=com.endlessm.EknServices2.SearchProviderV2',
-        ]
-        manifest['add-extensions'].update({
-            'com.endlessm.Platform': {
-                'directory': 'sdk/0',
-                'no-autodownload': True,
-                'versions': 'eos3.1;eos3.0',
-            },
-            'com.endlessm.apps.Platform@1': {
-                'directory': 'sdk/1',
-                'no-autodownload': True,
-                'version': '1',
-            },
-            'com.endlessm.apps.Platform@2': {
-                'directory': 'sdk/2',
-                'no-autodownload': True,
-                'version': '2',
-            },
-            'com.endlessm.apps.Platform@3': {
-                'directory': 'sdk/3',
-                'no-autodownload': True,
-                'version': '3',
-            },
-            'com.endlessm.apps.Platform@4': {
-                'directory': 'sdk/4',
-                'no-autodownload': True,
-                'version': '4'
-            },
-        })
+    for sdk_version in range(0, LAST_SDK_VERSION + 1):
+        if should_include_sdk_version(sdk_version, kwargs['arch']):
+            if sdk_version == 0:
+                manifest['add-extensions'].update({
+                    'com.endlessm.Platform': {
+                        'directory': 'sdk/0',
+                        'no-autodownload': True,
+                        'versions': 'eos3.1;eos3.0',
+                    },
+                })
+            else:
+                manifest['add-extensions'].update({
+                    f'com.endlessm.apps.Platform@{sdk_version}': {
+                        'directory': f'sdk/{sdk_version}',
+                        'no-autodownload': True,
+                        'version': str(sdk_version),
+                    },
+                })
+                directories_build_commands.append(f'mkdir -p /app/sdk/{sdk_version}')
 
-        directories_module = None
-        for module in manifest['modules']:
-            if module['name'] == DIRECTORIES_MODULE_NAME:
-                directories_module = module
-                break
-        if directories_module is None:
-            raise Exception(f'Could not find module {DIRECTORIES_MODULE_NAME}')
+    for eks_version in range(1, LAST_EKS_VERSION + 1):
+        if should_include_eks_version(eks_version, kwargs['arch']):
+            eks_id_segment_version = '' if eks_version == 1 else str(eks_version)
 
-        directories_build_commands = directories_module['build-commands']
-        directories_build_commands += [f'mkdir -p /app/sdk/{version}'
-                                       for version in range(1, 6)]
-        for version in range(1, 3):
+            manifest['base-extensions'].append(
+                f'com.endlessm.EknServices{eks_id_segment_version}.Extension'
+            )
+
+            manifest['finish-args'].append(
+                f'--own-name=com.endlessm.EknServices{eks_id_segment_version}'
+                f'.SearchProviderV{eks_version}'
+            )
+
             directories_build_commands += [
-                ('cp -r /app/build/eos-knowledge-services/{v} '
-                 '/app/eos-knowledge-services/{v}'
-                 .format(v=version)),
-                ('mv /app/eos-knowledge-services/{v}/lib/debug '
-                 '/app/lib/debug/eos-knowledge-services/{v}'
-                 .format(v=version)),
-                ('ln -s '
-                 '/app/eos-knowledge-services/{v}/bin/eks-search-provider-v{v} '
-                 '/app/bin/eks-search-provider-v{v}'
-                 .format(v=version)),
-            ]
+                (f'cp -r /app/build/eos-knowledge-services/{eks_version} '
+                 f'/app/eos-knowledge-services/{eks_version}'),
 
+                (f'mv /app/eos-knowledge-services/{eks_version}/lib/debug '
+                 f'/app/lib/debug/eos-knowledge-services/{eks_version}'),
+
+                ('ln -s '
+                 f'/app/eos-knowledge-services/{eks_version}'
+                 f'/bin/eks-search-provider-v{eks_version} '
+                 f'/app/bin/eks-search-provider-v{eks_version}')
+            ]
     with open(get_output_filename(MULTIPLEXER_MANIFEST_TEMPLATE), 'w') as foutput:
-        foutput.write(replace_placeholders(json.dumps(manifest, indent=4),
-                                           **kwargs))
+        foutput.write(json.dumps(manifest, indent=4))
 
 
 ap = ArgumentParser(

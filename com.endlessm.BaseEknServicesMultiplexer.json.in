@@ -4,19 +4,12 @@
     "runtime": "com.endlessm.apps.Platform",
     "runtime-version": "@SDK_BRANCH@",
     "sdk": "com.endlessm.apps.Sdk",
-    "add-extensions": {
-        "com.endlessm.EknServices3.Extension": {
-            "directory": "build/eos-knowledge-services/3",
-            "version": "@BRANCH@"
-        }
-    },
+    "add-extensions": {},
     "modules": [
         {
             "name": "multi-eos-knowledge-services-directories",
             "buildsystem": "simple",
-            "build-commands": [
-                "mkdir -p /app/build/eos-knowledge-services/3"
-            ]
+            "build-commands": []
         },
         {
             "name": "appstream",
