@@ -82,7 +82,15 @@ def generate_base_manifest(**kwargs):
 
     for eks_version in range(1, LAST_EKS_VERSION + 1):
         if should_include_eks_version(eks_version, kwargs['arch']):
-            eks_branch = 'eos3' if eks_version == 1 else 'stable'
+            if eks_version == 1:
+                eks_branch = 'eos3'
+            elif eks_version == LAST_EKS_VERSION:
+                # Use latest EknServices master branch if we are building for
+                # master. Earlier EknServices extension versions should always
+                # always use stable branch.
+                eks_branch = kwargs['branch']
+            else:
+                eks_branch = 'stable'
             eks_id_segment_version = '' if eks_version == 1 else str(eks_version)
 
             manifest['add-extensions'].update({
