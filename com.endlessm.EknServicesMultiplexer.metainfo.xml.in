@@ -7,4 +7,5 @@
   <summary>Desktop search provider for Endless applications</summary>
   <url type="homepage">https://endlessos.com/</url>
   <project_group>Endless</project_group>
+  <content_rating type="oars-1.1" />
 </component>
