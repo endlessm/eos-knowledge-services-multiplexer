@@ -5,6 +5,9 @@
   <project_license>LGPL-2.1+</project_license>
   <name>Endless Desktop Search</name>
   <summary>Desktop search provider for Endless applications</summary>
+  <description>
+    <p>When you type to search on the desktop, Endless Desktop Search finds results from applications on your computer such as Encyclopedia.</p>
+  </description>
   <url type="homepage">https://endlessos.com/</url>
   <project_group>Endless</project_group>
   <content_rating type="oars-1.1" />
