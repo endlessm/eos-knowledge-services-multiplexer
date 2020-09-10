@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2020 Endless OS Foundation LLC -->
 <component type="generic">
   <id>com.endlessm.EknServicesMultiplexer</id>
   <metadata_license>CC0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
   <name>Endless Desktop Search</name>
   <summary>Desktop search provider for Endless applications</summary>
+  <description>
+    <p>When you type to search on the desktop, Endless Desktop Search finds results from applications on your computer such as Encyclopedia.</p>
+  </description>
   <url type="homepage">https://endlessos.com/</url>
+  <update_contact>apps-platform@endlessm.com</update_contact>
   <project_group>Endless</project_group>
+  <content_rating type="oars-1.1" />
 </component>
