@@ -7,7 +7,6 @@
     "runtime-version": "@SDK_BRANCH@",
     "sdk": "com.endlessm.apps.Sdk",
     "finish-args": [
-        "--filesystem=/run/flatpak:ro",
         "--filesystem=/var/lib/flatpak:ro",
         "--filesystem=/var/endless-extra/flatpak:ro",
         "--filesystem=~/.local/share/flatpak:ro",
